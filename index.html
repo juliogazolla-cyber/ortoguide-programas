@@ -531,11 +531,12 @@ const MODELOS = {
 };
 
 const CRENCAS = {
-  picaretagem:{t:'Parece picaretagem',r:'Picaretagem é vender pacote de consulta com nome bonito. Programa tem disponibilidade ativa: você busca o paciente, cobra execução e ajusta o plano toda semana. Na consulta avulsa você só espera ele voltar. Quem ganha mais é o paciente, que adere mais e melhora mais.'},
-  naopaga:{t:'Meu paciente não paga',r:'Ele não paga por consulta extra. Paga por facilidade, trilho e alguém olhando por ele. Teste com um paciente só. O resultado dele resolve a sua dúvida melhor do que qualquer argumento.'},
-  cirurgiao:{t:'Sou cirurgião, não dá',r:'Cirurgião tem três caminhos: programa clínico quando não há indicação de cirurgia, jornada cirúrgica com pré, intra e pós estruturados, e manutenção para não recidivar. Pensar só em "operou, acabou" deixa resultado e receita na mesa.'},
-  estruturando:{t:'Ainda tô estruturando',r:'Primeiro vende, depois aperfeiçoa. Os três primeiros pacientes vão desenhar o programa com você. O esqueleto que sair daqui é bom o bastante para oferecer na semana que vem.'},
-  agenda:{t:'Não tenho agenda pra isso',r:'Retorno online e parceiro cuidando do miolo liberam a sua agenda. Um programa bem montado usa menos consulta presencial do que o vai e volta da consulta avulsa.'}
+  picaretagem:{t:'Parece picaretagem',r:'Picaretagem é juntar consultas num pacote com nome bonito e esperar o paciente aparecer. No programa você vai atrás dele: confere o calendário toda semana, cobra o que foi combinado e muda o plano quando não funciona. Quem mais ganha com isso é o paciente, que segue o tratamento e melhora mais.'},
+  naopaga:{t:'Meu paciente não paga',r:'Ele não está pagando por mais consultas. Está pagando para ter alguém olhando por ele e um caminho claro até ficar bem. Teste com um paciente só. O resultado dele responde essa dúvida melhor do que qualquer argumento.'},
+  cirurgiao:{t:'Sou cirurgião, não dá',r:'Dá, e de três jeitos. Um programa clínico para quem não tem indicação de cirurgia. Uma jornada cirúrgica, com pré e pós-operatório organizados e alguém da equipe disponível. E uma manutenção depois, para a dor não voltar. Pensar só em "operou, acabou" deixa resultado e receita na mesa.'},
+  estruturando:{t:'Ainda estou estruturando',r:'Primeiro venda, depois melhore. Os três primeiros pacientes vão te mostrar o que ajustar. O programa que sair daqui hoje já é bom o bastante para oferecer na semana que vem.'},
+  agenda:{t:'Não tenho agenda para isso',r:'O programa usa menos horário presencial do que parece. Parte das consultas é online e o parceiro cuida do dia a dia do exercício. Muitas vezes ocupa menos agenda do que o vai e volta da consulta avulsa.'},
+  caro:{t:'O paciente vai achar caro',r:'Ele acha caro quando não entende o que está comprando. Por isso a venda começa pela dor que ele mesmo contou e pelo que ele quer de volta. E o preço nunca fica abaixo do que ele pagaria fazendo tudo avulso.'}
 };
 
 const STEPS = ['Cadastro','O que é um programa','Condição','Seu paciente','Formato','Preço','Seu programa'];
@@ -716,7 +717,10 @@ ${H('Etapa 1 · O básico','O que é um programa de acompanhamento?','Em vez de 
   <p>12 semanas. 3 consultas presenciais e 3 online. 8 sessões de fisioterapia com um fisioterapeuta parceiro. Grupo de WhatsApp só do paciente com o médico e o fisio. Escala de dor e força no começo, no meio e no fim. A meta é voltar a jogar tênis, e a comemoração é uma partida com o médico. O paciente paga um valor fechado no início.</p>
 </div>
 <div class="note"><b>Por que funciona.</b> Paciente acompanhado de perto segue o tratamento, e quem segue o tratamento melhora mais. Para você, a receita deixa de depender do retorno espontâneo.</div>
-<div class="note">Cirurgião também pode ter programa: um clínico para quem não tem indicação de cirurgia, uma jornada cirúrgica com o pré e o pós-operatório organizados, ou uma manutenção para a dor não voltar.</div>`;
+<h3 class="sec">Alguma dessas dúvidas passou pela sua cabeça?</h3>
+<p style="margin:-6px 0 12px;color:var(--muted);font-size:13.5px">Toque nas que fizerem sentido para ver a resposta.</p>
+<div class="chips">${Object.entries(CRENCAS).map(([k,c])=>`<button type="button" class="chip ${S.crencas.includes(k)?'on':''}" data-chip="crencas" data-v="${k}">${c.t}</button>`).join('')}</div>
+${S.crencas.map(k=>`<div class="note"><b>${CRENCAS[k].t}.</b> ${CRENCAS[k].r}</div>`).join('')}`;
 
 VIEWS[2]=()=>`
 ${H('Etapa 2 · Condição','Para qual condição vai ser o seu primeiro programa?','Escolha a que mais aparece na sua agenda e que você gosta de tratar. Comece com um só. Depois você copia o modelo para as outras.')}
