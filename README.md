@@ -10,7 +10,7 @@ Para atualizar, edite o `index.html` e envie de novo para o repositório `juliog
 
 ## Leads
 
-Cada médico gera dois e-mails em julio.gazolla@gmail.com, enviados pelo FormSubmit:
+Cada médico gera dois e-mails em ortoguidementoria@gmail.com, enviados pelo FormSubmit:
 - "Novo cadastro na Masterclass": quando ele passa da primeira tela.
 - "Lead quente": quando gera o blueprint, com modelo, valor da consulta, régua mínima e preço. É quem mais vale uma ligação.
 
