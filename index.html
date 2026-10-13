@@ -109,6 +109,7 @@ textarea{min-height:84px;resize:vertical;line-height:1.5}
 .box.off .boxbody{display:none}
 .boxhead{display:flex;align-items:center;gap:10px;font-weight:700}
 .boxhead input{width:18px;height:18px;accent-color:var(--navy)}
+.boxhead input[type=text]{width:auto;height:auto;flex:1;min-width:0;padding:10px 12px;font-weight:600}
 .boxhead small{margin-left:auto;font-weight:500;color:var(--soft)}
 .boxbody{margin-top:12px}
 .stack{display:grid;gap:12px}
@@ -626,6 +627,7 @@ function novoEstado(){
     semanas:12,manut:true,manutMeses:3,manutContatos:2,presencial:3,online:3,
     parceiros:Object.keys(PARCEIROS).map(id=>({id,nome:PARCEIROS[id].nome,on:false,n:4,valor:PARCEIROS[id].valor,papel:PARCEIROS[id].papel})),
     basico:'',acoplaveis:[],
+    procsCustom:[],
     procs:Object.fromEntries(Object.keys(PROCS).map(id=>[id,{faz:false,extra:false,modo:'aparte',qtd:1,preco:PROCS[id].preco}])),
     pilares:Object.keys(PILARES).filter(id=>!['preop','cirurgia','posop'].includes(id)).map(id=>({id,nome:PILARES[id].nome,on:false,acoes:PILARES[id].acoes.join('\n')})),
     metricas:[],diaCheck:'Segunda-feira',microdesafio:'',
@@ -706,7 +708,8 @@ function procsRel(){return S.modelo&&S.modelo!=='livre'?Object.keys(MODELOS[S.mo
 function procsAtivos(){
   const rel=procsRel();
   return Object.keys(PROCS).filter(id=>rel.includes(id)?S.procs[id].faz:S.procs[id].extra)
-    .map(id=>({id,...PROCS[id],modo:S.procs[id].modo,qtd:Math.max(1,num(S.procs[id].qtd)),preco:num(S.procs[id].preco),total:Math.max(1,num(S.procs[id].qtd))*num(S.procs[id].preco)}));
+    .map(id=>({id,...PROCS[id],modo:S.procs[id].modo,qtd:Math.max(1,num(S.procs[id].qtd)),preco:num(S.procs[id].preco),total:Math.max(1,num(S.procs[id].qtd))*num(S.procs[id].preco)}))
+    .concat((S.procsCustom||[]).filter(x=>String(x.nome||'').trim()).map((x,i)=>{const q=Math.max(1,num(x.qtd));return {id:'c'+i,nome:x.nome.trim(),curto:/^[A-ZÀ-Ý][a-zà-ÿ]/.test(x.nome.trim())?lc(x.nome):x.nome.trim(),un:'sessão',modo:x.modo,qtd:q,preco:num(x.preco),total:q*num(x.preco)}}));
 }
 const procsInc=()=>procsAtivos().filter(x=>x.modo==='incluso');
 const procsAparte=()=>procsAtivos().filter(x=>x.modo!=='incluso');
@@ -833,6 +836,17 @@ const VIEW_PROCS=()=>{
 ${H('Etapa 3 · Procedimentos','O que você faz no consultório?',`Marque os procedimentos que você já faz${nomeCond?` e que costumam entrar em ${esc(nomeCond)}`:''}. Cada um pode entrar de dois jeitos: incluído para todo paciente do programa, ou à parte, somado só quando você indicar.`)}
 <div class="stack">${rel.map(id=>row(id,'faz')).join('')}</div>
 ${outros.length?`<details class="more" style="margin-top:14px"><summary>Faz outro procedimento que quer usar neste programa?</summary><div class="stack" style="margin-top:12px">${outros.map(id=>row(id,'extra')).join('')}</div></details>`:''}
+<h3 class="sec">Usa outro tratamento?</h3>
+<p style="margin:-6px 0 12px;color:var(--muted);font-size:13.5px">Escreva o nome e ele entra no programa como os procedimentos acima.</p>
+<div class="stack">${(S.procsCustom||[]).map((x,i)=>`
+  <div class="box">
+    <div class="boxhead" style="gap:8px"><input type="text" data-k="procsCustom.${i}.nome" value="${esc(x.nome)}" placeholder="Nome do tratamento. Ex.: laserterapia, agulhamento seco" aria-label="Nome do tratamento" style="flex:1"><button type="button" class="x" data-delcproc="${i}" aria-label="Remover" style="border:0;background:none;color:var(--soft);font-size:22px">×</button></div>
+    <div class="boxbody">
+      <div class="seg">${[['aparte','À parte, só se indicado'],['incluso','Incluído para todos']].map(([v,t])=>`<button type="button" class="${x.modo===v?'on':''}" data-cmodo="${i}" data-v="${v}">${t}</button>`).join('')}</div>
+      <div class="grid" style="margin-top:12px">${fMoney(`procsCustom.${i}.preco`,'Quanto você cobra por sessão ou aplicação')}${fNum(`procsCustom.${i}.qtd`,'Quantas no programa',1,20)}</div>
+    </div>
+  </div>`).join('')}</div>
+<button type="button" class="link" id="addCProc">+ Adicionar outro tratamento</button>
 <div class="note" data-live="procsum"></div>
 <div class="note">Inclua só o que quase todo paciente dessa condição vai precisar. O resto fica à parte. A indicação é sempre sua, paciente por paciente. Os valores sugeridos são só referência: coloque os seus.</div>`;
 };
@@ -1234,6 +1248,9 @@ document.addEventListener('click',e=>{
     if(S.modelo!==k)aplicarModelo(k);save();render();scrollTo(0,y);return;
   }
   if(t.dataset.chip){const arr=S[t.dataset.chip],v=t.dataset.v,ix=arr.indexOf(v);ix>=0?arr.splice(ix,1):arr.push(v);save();render();scrollTo(0,y);return}
+  if(t.dataset.cmodo!==undefined){S.procsCustom[+t.dataset.cmodo].modo=t.dataset.v;save();render();scrollTo(0,y);return}
+  if(t.dataset.delcproc!==undefined){S.procsCustom.splice(+t.dataset.delcproc,1);save();render();scrollTo(0,y);return}
+  if(t.id==='addCProc'){S.procsCustom.push({nome:'',preco:0,qtd:1,modo:'aparte'});save();render();scrollTo(0,y);const ins=document.querySelectorAll('[data-k^="procsCustom."][data-k$=".nome"]');ins[ins.length-1]?.focus();return}
   if(t.dataset.procmodo){S.procs[t.dataset.procmodo].modo=t.dataset.v;save();render();scrollTo(0,y);return}
   if(t.dataset.setnum){S[t.dataset.setnum]=+t.dataset.v;save();render();scrollTo(0,y);return}
   if(t.dataset.parc!==undefined){const p=S.parceiros[+t.dataset.parc];p.on=!p.on;save();render();scrollTo(0,y);return}
