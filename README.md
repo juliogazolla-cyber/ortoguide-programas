@@ -4,7 +4,9 @@ Arquivo único: `index.html`. Não precisa de servidor nem de instalação.
 
 ## No ar
 
-Link público: https://juliogazolla-cyber.github.io/ortoguide-programas/
+Link público: https://programa.ortoguideaccess.com.br/
+
+O domínio aponta para o GitHub Pages por um registro CNAME no Registro.br (`programa` → `juliogazolla-cyber.github.io`). O link antigo, juliogazolla-cyber.github.io/ortoguide-programas, redireciona para o novo.
 
 Para atualizar, edite o `index.html` e envie de novo para o repositório `juliogazolla-cyber/ortoguide-programas` (o Claude Code faz isso).
 
