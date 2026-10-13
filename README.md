@@ -29,7 +29,7 @@ function doPost(e) {
   const ss = SpreadsheetApp.getActive();
   const sh = ss.getSheetByName('Leads') || ss.insertSheet('Leads');
   const cols = ['ts','evento','origem','nome','whatsapp','email','subespecialidade','cidade','momento',
-    'vendePrograma','marketing','crencas','consulta','modelo','programa','semanas','parceiros','regua','preco'];
+    'vendePrograma','marketing','crencas','consulta','modelo','programa','semanas','parceiros','procedimentos','regua','preco'];
   if (sh.getLastRow() === 0) sh.appendRow(cols);
   sh.appendRow(cols.map(c => d[c] ?? ''));
   return ContentService.createTextOutput('ok');
@@ -46,12 +46,14 @@ function doPost(e) {
 
 ## O que a ferramenta faz
 
-7 telas curtas, pensadas para quem nunca montou um programa:
-cadastro, o que é um programa (consulta avulsa x programa, com exemplo), condição, seu paciente, formato, preço e seu programa.
+8 telas curtas, pensadas para quem nunca montou um programa:
+cadastro, o que é um programa (com as quebras de objeção), condição (ordenada pela subespecialidade), procedimentos, seu paciente, formato, preço e seu programa.
+
+Na etapa de procedimentos o médico marca o que faz (infiltração, viscossuplementação, PRP, onda de choque, bloqueios, hidrodistensão, barbotagem, radiofrequência, ultrassom, órtese) e escolhe, para cada um, se entra incluído para todos ou à parte, quando indicado. Os incluídos entram no preço. Os valores sugeridos ficam no objeto `PROCS` e são só referência.
 
 Tudo vem preenchido pelo modelo escolhido. Os detalhes (plano de ações, procedimentos à parte, métrica, brinde, nome) ficam numa tela opcional de ajustes, aberta a partir do resultado.
 
-8 modelos pré-preenchidos: epicondilite, manguito, capsulite, artrose, lombalgia, jornada cirúrgica, retorno ao esporte e em branco. Os textos dos modelos ficam no objeto `MODELOS` dentro do `index.html`. Vale um ortopedista da equipe revisar antes da aula.
+10 modelos pré-preenchidos: epicondilite, manguito, capsulite, artrose, lombalgia, fascite plantar, rizartrose, jornada cirúrgica, retorno ao esporte e em branco. Os textos dos modelos ficam no objeto `MODELOS` dentro do `index.html`. Vale um ortopedista da equipe revisar antes da aula.
 
 Entregáveis para o aluno: blueprint em PDF, calendário do paciente para imprimir, roteiro de 5 frases, roteiro da secretária, planilha de KPIs (.csv) e o prompt completo do Arquiteto com o blueprint dele para continuar no ChatGPT, Claude ou Gemini.
 
