@@ -41,7 +41,7 @@ function doPost(e) {
 
 ## Botão final
 
-`ctaUrl` e `ctaTexto` no mesmo `CONFIG`. Hoje aponta para o Instagram da OrtoGuide. Troque pelo link do WhatsApp de vendas ou da página de aplicação da Mentoria.
+`ctaUrl` e `ctaTexto` no mesmo `CONFIG`. Hoje abre o WhatsApp de vendas (51 99780-5002) com uma mensagem pronta.
 
 
 ## O que a ferramenta faz
