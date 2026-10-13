@@ -46,8 +46,10 @@ function doPost(e) {
 
 ## O que a ferramenta faz
 
-10 etapas, seguindo o método do Arquiteto de Programas:
-cadastro, crenças, programa-modelo, dor e transformação, tempo e contatos, parceiros e acopláveis, pilares e ações, métrica e experiência, preço, blueprint.
+7 telas curtas, pensadas para quem nunca montou um programa:
+cadastro, o que é um programa (consulta avulsa x programa, com exemplo), condição, seu paciente, formato, preço e seu programa.
+
+Tudo vem preenchido pelo modelo escolhido. Os detalhes (plano de ações, procedimentos à parte, métrica, brinde, nome) ficam numa tela opcional de ajustes, aberta a partir do resultado.
 
 8 modelos pré-preenchidos: epicondilite, manguito, capsulite, artrose, lombalgia, jornada cirúrgica, retorno ao esporte e em branco. Os textos dos modelos ficam no objeto `MODELOS` dentro do `index.html`. Vale um ortopedista da equipe revisar antes da aula.
 

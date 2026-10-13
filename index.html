@@ -157,6 +157,27 @@ textarea{min-height:84px;resize:vertical;line-height:1.5}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:9}
 .toast.show{opacity:1;transform:translateX(-50%)}
 
+/* básico */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vs>div{border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.vs>div.b{border-color:var(--gold);background:var(--gold-bg)}
+.vs h4{font-size:15px;margin-bottom:8px}
+.vs ul{margin:0;padding-left:18px;font-size:14px;color:#3a4652}
+.vs li{margin:5px 0}
+.ex{border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.ex b{font-size:16px}.ex span{color:var(--muted);font-size:13px;margin-left:8px}
+.ex p{margin:8px 0 0;color:#3a4652;font-size:14px}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sum>div{border:1px solid var(--line);border-radius:12px;padding:14px}
+.sum small{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
+.sum b{display:block;font-size:22px;margin:2px 0}
+.sum span{font-size:12.5px;color:var(--muted)}
+.sum .gold{background:var(--navy);border-color:var(--navy)}
+.sum .gold b{color:var(--gold)}.sum .gold span,.sum .gold small{color:#c9d5e1}
+details.more{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:26px}
+details.more summary{cursor:pointer;font-weight:700;color:var(--navy)}
+.adjust{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border:1px dashed var(--line2);border-radius:12px;padding:14px 16px;margin-top:16px}
+.adjust p{margin:2px 0 0;color:var(--muted);font-size:13px}
 /* resultado */
 .bp-hero{background:var(--navy);color:#fff;border-radius:14px;padding:26px 28px;margin:4px 0 22px}
 .bp-hero h2{color:#fff;font-size:30px;margin:6px 0 6px}
@@ -216,12 +237,13 @@ textarea{min-height:84px;resize:vertical;line-height:1.5}
   .gets{grid-template-columns:1fr 1fr}
   .price{grid-template-columns:1fr}
   .extra{grid-template-columns:1fr}
+  .sum{grid-template-columns:1fr 1fr}
 }
 @media (max-width:640px){
   .top small{display:none}
   .panel{padding:22px 16px}
   .panel h2{font-size:24px}
-  .grid,.grid3,.cards,.princ{grid-template-columns:1fr}
+  .grid,.grid3,.cards,.princ,.vs{grid-template-columns:1fr}
   .full{grid-column:auto}
   .bp>div{grid-template-columns:1fr}
   .bp h4{border-right:0;border-bottom:1px solid var(--line)}
@@ -244,7 +266,11 @@ textarea{min-height:84px;resize:vertical;line-height:1.5}
   .panel{border:0;box-shadow:none;padding:0}
   .bp-hero{background:#f1f2f4;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .bp-hero h2,.bp-hero p{color:#000}
-  .bp>div,.script li{break-inside:avoid}
+  .bp>div,.script li,.sum>div{break-inside:avoid}
+  details.more{border:0;padding:0}
+  details.more summary{display:none}
+  .sum .gold{background:#f1f2f4;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sum .gold b,.sum .gold span,.sum .gold small{color:#000}
   .calwrap{break-before:page}
   body.print-cal .bpwrap{display:none}
   body.print-cal .calwrap{break-before:auto}
@@ -512,9 +538,9 @@ const CRENCAS = {
   agenda:{t:'Não tenho agenda pra isso',r:'Retorno online e parceiro cuidando do miolo liberam a sua agenda. Um programa bem montado usa menos consulta presencial do que o vai e volta da consulta avulsa.'}
 };
 
-const STEPS = ['Cadastro','Antes de montar','Programa-modelo','Dor e transformação','Tempo e contatos','Parceiros e acopláveis','Pilares e ações','Métrica e experiência','Preço','Seu blueprint'];
+const STEPS = ['Cadastro','O que é um programa','Condição','Seu paciente','Formato','Preço','Seu programa'];
 const DIAS = ['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
-const KEY = 'ortoguide_programa_v1';
+const KEY = 'ortoguide_programa_v2';
 
 /* ================== ESTADO ================== */
 function novoEstado(){
@@ -597,7 +623,7 @@ function contatos(){
   const out=[];
   for(let i=0;i<total;i++){
     const sem=total===1?0:Math.round(i*N/(total-1));
-    const label=i===0?'Consulta de início do programa (conexão, mantra, metas e plano por pilares)':i===total-1?'Reavaliação final, métrica de evolução e decisão: manutenção ou nova fase':'Revisão do calendário, métrica e ajuste do plano';
+    const label=i===0?'Primeira consulta do programa: metas e plano de ações':i===total-1?'Reavaliação final: quanto melhorou e o que vem depois':'Revisão: o que funcionou e o que ajustar';
     out.push({sem,tipo:pres.has(i)?'Presencial':'Online',p:pres.has(i),label});
   }
   return out;
@@ -642,199 +668,113 @@ function proximosPassos(){
 
 /* ================== TELAS ================== */
 const VIEWS=[];
+const H=(eb,t,l)=>`<div class="eyebrow">${eb}</div><h2 class="serif">${t}</h2>${l?`<p class="lead">${l}</p>`:''}`;
 
 VIEWS[0]=()=>`
 <div class="hero">
   <div class="eyebrow">Masterclass OrtoGuide · 17 de outubro de 2026</div>
-  <h1 class="serif">Saia daqui com um programa de acompanhamento pronto para vender na semana que vem.</h1>
-  <p>Em uns 15 minutos você escolhe a condição, define a dor que o programa resolve, monta os pilares, calcula o preço e leva o blueprint e o calendário do paciente prontos para imprimir.</p>
+  <h1 class="serif">Monte o seu primeiro programa de acompanhamento em 10 minutos.</h1>
+  <p>Você escolhe a condição que mais atende, confere o que já vem pronto e sai com o programa desenhado, o preço calculado e o que falar para o paciente na consulta.</p>
 </div>
 <div class="gets">
-  <div><b>8 modelos</b>Cotovelo, ombro, joelho, coluna, cirurgia e esporte, já preenchidos</div>
-  <div><b>Calculadora</b>Régua mínima, preço sugerido, parcelamento e manutenção</div>
-  <div><b>Blueprint</b>14 itens, roteiro de venda e próximos passos</div>
-  <div><b>Calendário</b>Para o paciente marcar as ações, pronto para imprimir</div>
+  <div><b>Nunca montou um?</b>A primeira tela explica o básico</div>
+  <div><b>Já vem preenchido</b>8 condições de ortopedia prontas para adaptar</div>
+  <div><b>Preço calculado</b>Sem cobrar abaixo do que você já cobraria avulso</div>
+  <div><b>Pronto para usar</b>Resumo em PDF, roteiro de venda e calendário do paciente</div>
 </div>
-<h3 class="sec">Primeiro, quem é você</h3>
+<h3 class="sec">Para começar, seus dados</h3>
 <div class="grid">
   ${fInput('lead.nome','Nome completo *',{ph:'Dr(a). Nome Sobrenome',ac:'name',req:1})}
   ${fInput('lead.whats','WhatsApp com DDD *',{ph:'(11) 99999-9999',ac:'tel',im:'tel',type:'tel',req:1})}
   ${fInput('lead.email','E-mail *',{ph:'voce@consultorio.com.br',ac:'email',type:'email',req:1})}
   ${fSelect('lead.sub','Subespecialidade *',['Ombro e cotovelo','Joelho','Quadril','Coluna','Mão e punho','Pé e tornozelo','Medicina esportiva','Trauma','Ortopedia pediátrica','Ortopedia geral','Ainda na residência'],{req:1})}
-  ${fInput('lead.cidade','Cidade / UF',{ph:'Belo Horizonte / MG'})}
-  ${fSelect('lead.momento','Momento do consultório *',['Residente ou R4','Começando o particular','Particular em crescimento','Particular consolidado','Mais convênio do que particular'],{req:1})}
-  ${fSelect('lead.vende','Você já vende algum programa de acompanhamento?',['Não, nunca vendi','Já tentei, mas parei','Sim, vendo 1 programa','Sim, vendo mais de 1 programa'],{full:1})}
+  ${fSelect('lead.momento','Como está o seu consultório hoje? *',['Ainda na residência','Começando o particular','Particular em crescimento','Particular consolidado','Mais convênio do que particular'],{req:1,full:1})}
 </div>
 ${fCheck('lead.consent','Concordo com o uso destes dados pela OrtoGuide para gerar meu material e falar comigo sobre ele, conforme a LGPD. *')}
 ${fCheck('lead.mkt','Quero receber conteúdos e convites da OrtoGuide por WhatsApp e e-mail. Posso cancelar quando quiser.')}
-<div class="note">Esta ferramenta não pede e não guarda nenhum dado de paciente. Use sempre casos anônimos.</div>
 <div class="err" id="err"></div>`;
 
 VIEWS[1]=()=>`
-<div class="eyebrow">Etapa 1 · Antes de montar</div>
-<h2 class="serif">Programa não é pacote de consultas.</h2>
-<p class="lead">Se você não acreditar nisso, não vende. Leia os sete princípios com calma, eles vão aparecer de novo em cada etapa.</p>
-<div class="princ">
-  <div><b><i>1</i>Disponibilidade ativa</b>Você lidera, busca o paciente, cobra execução e ajusta o plano. Na consulta avulsa você só espera ele voltar.</div>
-  <div><b><i>2</i>Começa pela dor</b>O programa trata o que a doença tira da vida da pessoa. Não consegue jogar tênis, não dorme, não pega o neto no colo. Não trata o CID.</div>
-  <div><b><i>3</i>Primeiro vende, depois aperfeiçoa</b>Os primeiros pacientes desenham o programa com você.</div>
-  <div><b><i>4</i>Estrutura em espeto</b>Um esqueleto que serve para uns 90% dos casos, e nele você acopla o que cada paciente precisa.</div>
-  <div><b><i>5</i>Simplicidade vende</b>O paciente compra facilidade e trilho. Parceiro demais e etapa demais passam a ideia de "isso não é para mim".</div>
-  <div><b><i>6</i>O paciente ganha mais</b>Adesão e resultado são muito maiores do que no vai e volta da consulta avulsa.</div>
-  <div class="full" style="grid-column:1/-1"><b><i>7</i>Cirurgião também tem programa</b>Programa clínico quando não há indicação cirúrgica, jornada cirúrgica com pré, intra e pós estruturados, e manutenção para não voltar a doer.</div>
+${H('Etapa 1 · O básico','O que é um programa de acompanhamento?','Em vez de o paciente ir e voltar quando lembra, você oferece um período de cuidado com começo, meio e fim, por um valor fechado. E durante esse período quem vai atrás é você.')}
+<div class="vs">
+  <div><h4>Consulta avulsa</h4><ul>
+    <li>O paciente volta se quiser, quando quiser</li>
+    <li>Entre uma consulta e outra, ninguém acompanha</li>
+    <li>A orientação fica na memória dele</li>
+    <li>Ninguém mede a melhora</li>
+    <li>Você cobra consulta por consulta</li></ul></div>
+  <div class="b"><h4>Programa de acompanhamento</h4><ul>
+    <li>As datas já estão marcadas e você vai atrás dele</li>
+    <li>Grupo de WhatsApp e checagem toda semana</li>
+    <li>Um plano escrito, com ações que ele marca num calendário</li>
+    <li>Uma escala no início, no meio e no fim mostra quanto ele melhorou</li>
+    <li>Um valor só, pelo período todo</li></ul></div>
 </div>
-<h3 class="sec">Alguma dessas frases já passou pela sua cabeça?</h3>
-<div class="chips">${Object.entries(CRENCAS).map(([k,c])=>`<button type="button" class="chip ${S.crencas.includes(k)?'on':''}" data-chip="crencas" data-v="${k}">${c.t}</button>`).join('')}</div>
-${S.crencas.map(k=>`<div class="note"><b>${CRENCAS[k].t}.</b> ${CRENCAS[k].r}</div>`).join('')}
-${S.crencas.length?'':'<p class="hint" style="color:var(--soft);font-size:13px;margin-top:12px">Marque as que fizerem sentido. Se nenhuma, ótimo, siga em frente.</p>'}`;
+<h3 class="sec">Um exemplo de verdade</h3>
+<div class="ex">
+  <b>Programa Cotovelo Livre</b><span>para quem tem cotovelo de tenista</span>
+  <p>12 semanas. 3 consultas presenciais e 3 online. 8 sessões de fisioterapia com um fisioterapeuta parceiro. Grupo de WhatsApp só do paciente com o médico e o fisio. Escala de dor e força no começo, no meio e no fim. A meta é voltar a jogar tênis, e a comemoração é uma partida com o médico. O paciente paga um valor fechado no início.</p>
+</div>
+<div class="note"><b>Por que funciona.</b> Paciente acompanhado de perto segue o tratamento, e quem segue o tratamento melhora mais. Para você, a receita deixa de depender do retorno espontâneo.</div>
+<div class="note">Cirurgião também pode ter programa: um clínico para quem não tem indicação de cirurgia, uma jornada cirúrgica com o pré e o pós-operatório organizados, ou uma manutenção para a dor não voltar.</div>`;
 
 VIEWS[2]=()=>`
-<div class="eyebrow">Etapa 2 · Programa-modelo</div>
-<h2 class="serif">Escolha um programa só para construir agora.</h2>
-<p class="lead">Cruze três coisas: o que você domina, o que você gosta de tratar (programa dá mais trabalho e exige liderança) e o que mais aparece na sua agenda. Os outros programas vêm depois, copiando este.</p>
+${H('Etapa 2 · Condição','Para qual condição vai ser o seu primeiro programa?','Escolha a que mais aparece na sua agenda e que você gosta de tratar. Comece com um só. Depois você copia o modelo para as outras.')}
 <div class="cards">${Object.entries(MODELOS).map(([k,m])=>`<button type="button" class="pick ${S.modelo===k?'on':''}" data-modelo="${k}">
-  <span class="tag">${m.tipo==='cirurgico'?'Jornada cirúrgica':k==='livre'?'Em branco':'Programa clínico'}</span><b>${m.titulo}</b><span>${m.sub}</span></button>`).join('')}</div>
-${S.modelo?`
-<div class="note ok">Preenchemos as próximas etapas com sugestões para <b>${esc(MODELOS[S.modelo].titulo.toLowerCase())}</b>. Tudo é editável. Use como ponto de partida, não como protocolo.</div>
-<div class="grid" style="margin-top:8px">
-  ${fInput('condicao','Nome da condição no programa',{full:1})}
-  ${fText('publico','Para quem é',{hint:'perfil do paciente que entra',rows:2})}
-</div>
-<h3 class="sec">Qual caminho?</h3>
-<div class="chips">${[['clinico','Programa clínico'],['cirurgico','Jornada cirúrgica'],['manutencao','Manutenção']].map(([v,t])=>`<button type="button" class="chip ${S.tipo===v?'on':''}" data-set="tipo" data-v="${v}">${t}</button>`).join('')}</div>`:''}
+  <span class="tag">${m.tipo==='cirurgico'?'Para quem opera':k==='livre'?'Em branco':'Tratamento clínico'}</span><b>${m.titulo}</b><span>${m.sub}</span></button>`).join('')}</div>
+${S.modelo&&S.modelo!=='livre'?`<div class="note ok">Pronto. Já preenchemos o programa de <b>${esc(MODELOS[S.modelo].titulo.toLowerCase())}</b>. Nas próximas telas você só confere e ajusta.</div>`:''}
 <div class="err" id="err"></div>`;
 
 VIEWS[3]=()=>`
-<div class="eyebrow">Etapa 3 · Dor e transformação</div>
-<h2 class="serif">Como o paciente descreve o problema na vida dele?</h2>
-<p class="lead">Escreva com as palavras que ele usa no consultório, não com as do laudo. Isso vira o seu roteiro de venda.</p>
+${H('Etapa 3 · Seu paciente','Comece pela vida do paciente, não pelo diagnóstico.','Ninguém compra "tratamento de tendinopatia". O paciente compra voltar a dormir, a treinar, a pegar o neto no colo. O texto já vem pronto. Troque pelas palavras que os seus pacientes usam no consultório.')}
 <div class="grid">
-  ${fText('dor','O que ele não consegue mais fazer? *',{rows:3,ph:'Ex.: não consegue segurar a raquete nem a xícara de café sem dor'})}
-  ${fInput('pensa','Quantas vezes por dia ele pensa nisso?',{ph:'Ex.: toda vez que senta no computador',full:1})}
-</div>
-<h3 class="sec">Os 3 maiores benefícios, na boca do paciente</h3>
-<p style="margin:-6px 0 12px;color:var(--muted);font-size:13.5px">Viram o mantra escrito no calendário dele.</p>
-<div class="stack">${[0,1,2].map(i=>fInput('beneficios.'+i,`Benefício ${i+1}`,{full:1})).join('')}</div>
-<h3 class="sec">A frase da transformação</h3>
-<div class="grid">
-  ${fInput('transformacao','Transformação prometida *',{full:1,ph:'Ex.: voltar a jogar tênis sem dor no cotovelo'})}
+  ${fText('dor','O que ele não consegue mais fazer? *',{rows:2,ph:'Ex.: não consegue segurar a raquete nem a xícara de café sem dor'})}
+  ${fInput('transformacao','O que ele quer de volta? *',{full:1,ph:'Ex.: voltar a jogar tênis sem dor'})}
   <div class="full note" data-live="frase"></div>
-  ${fInput('meta','Meta legal',{full:1,hint:'algo que ele sonha fazer e que vocês vão comemorar juntos',ph:'Ex.: jogar uma partida de tênis com o médico'})}
+  ${fInput('meta','Uma meta para vocês comemorarem juntos no fim',{full:1,hint:'opcional',ph:'Ex.: jogar uma partida de tênis com o médico'})}
 </div>
 <div class="err" id="err"></div>`;
 
 VIEWS[4]=()=>`
-<div class="eyebrow">Etapa 4 · Tempo e contatos</div>
-<h2 class="serif">Tempo para dar resultado, curto para não perder o paciente.</h2>
-<p class="lead">A fase ativa tira da crise e entrega o grande resultado. A manutenção é mais leve, mais barata e evita que a dor volte.</p>
+${H('Etapa 4 · Formato','Quanto tempo dura e como você acompanha.','Já vem uma sugestão para a condição escolhida. Mude só o que quiser.')}
+<h3 class="sec">Duração</h3>
+<div class="chips">${[8,12,16,24].map(n=>`<button type="button" class="chip ${S.semanas==n?'on':''}" data-setnum="semanas" data-v="${n}">${n} semanas</button>`).join('')}</div>
+<h3 class="sec">Consultas com você nesse período</h3>
 <div class="grid">
-  ${fRange('semanas','Duração da fase ativa',6,24,1,'sem')}
-  ${fNum('presencial','Consultas presenciais com você',1,12)}
-  ${fNum('online','Retornos online com você',0,12)}
+  ${fNum('presencial','Presenciais',1,12)}
+  ${fNum('online','Online',0,12)}
 </div>
-<div class="note">Retorno online e parceiro cuidando do miolo liberam a sua agenda. Guarde o presencial para início, reavaliação e decisão.</div>
-<h3 class="sec">Seus pontos de contato na fase ativa</h3>
+<div class="note">A consulta online serve para revisar o plano sem ocupar horário de consultório.</div>
+<h3 class="sec">Parceiros</h3>
+<div class="chips">${S.parceiros.map((p,i)=>`<button type="button" class="chip ${p.on?'on':''}" data-parc="${i}">${esc(p.nome)}${p.on?` · ${p.n} sessões`:''}</button>`).join('')}</div>
+<div class="note ${S.parceiros.filter(p=>p.on).length>2?'warn':''}">${S.parceiros.filter(p=>p.on).length>2?'<b>Muitos parceiros assustam o paciente.</b> Para o primeiro programa, fique com um ou dois. ':''}Comece com poucos, ou nenhum. O paciente paga só a você, e você repassa ao parceiro com nota fiscal.</div>
+<h3 class="sec">Como fica a agenda do paciente</h3>
 <ul class="tl" data-live="timeline"></ul>
-<h3 class="sec">Fase de manutenção</h3>
-${fCheck('manut','Oferecer manutenção depois da fase ativa')}
-<div class="grid" style="margin-top:12px" data-show="manut">
-  ${fNum('manutMeses','Duração (meses)',1,12)}
-  ${fNum('manutContatos','Contatos com você nesse período',1,12)}
-</div>`;
+${fCheck('manut','Depois do programa, oferecer uma manutenção mais leve e mais barata, para a dor não voltar')}`;
 
 VIEWS[5]=()=>{
-  const nOn=S.parceiros.filter(p=>p.on).length;
+  const parc=S.parceiros.map((p,i)=>({p,i})).filter(x=>x.p.on);
   return `
-<div class="eyebrow">Etapa 5 · Parceiros, básico e acopláveis</div>
-<h2 class="serif">Poucos parceiros, bem escolhidos.</h2>
-<p class="lead">Gente alinhada com você em valores e disposta a jogar o jogo do engajamento. Defina com cada um quantos atendimentos, qual o papel, até onde vai e quanto recebe.</p>
-<div class="stack">${S.parceiros.map((p,i)=>`
-  <div class="box ${p.on?'':'off'}">
-    <label class="boxhead"><input type="checkbox" data-k="parceiros.${i}.on" data-rerender ${p.on?'checked':''}>${p.nome}<small>${p.on?brl(num(p.n)*num(p.valor))+' no programa':'não incluído'}</small></label>
-    <div class="boxbody grid3">
-      ${fNum(`parceiros.${i}.n`,'Atendimentos',1,40)}
-      ${fMoney(`parceiros.${i}.valor`,'Repasse por atendimento')}
-      ${fInput(`parceiros.${i}.papel`,'Papel e limite',{})}
-    </div>
-  </div>`).join('')}</div>
-${nOn>3?'<div class="note warn"><b>Atenção à complexidade.</b> Mais de três parceiros costuma assustar o paciente e travar a sua operação. Comece enxuto.</div>':''}
-<div class="note"><b>A cobrança é sempre sua.</b> O paciente paga só a você. O parceiro emite nota fiscal de serviço para a sua empresa. Ninguém cobra por fora.</div>
-<h3 class="sec">Básico para todos</h3>
-<div class="grid">${fText('basico','O que todo paciente do programa recebe',{rows:3})}</div>
-<h3 class="sec">Acopláveis, caso a caso</h3>
-<p style="margin:-6px 0 6px;color:var(--muted);font-size:13.5px">Procedimentos e exames que entram só com indicação individual. O valor soma ao programa quando entram.</p>
-<div>${S.acoplaveis.map((a,i)=>`<div class="acop">
-  <input type="checkbox" data-k="acoplaveis.${i}.on" ${a.on?'checked':''} title="Mostrar no blueprint">
-  <input type="text" data-k="acoplaveis.${i}.nome" value="${esc(a.nome)}" aria-label="Nome">
-  <div class="money"><span>R$</span><input type="number" min="0" step="50" data-k="acoplaveis.${i}.preco" data-num value="${esc(a.preco)}" aria-label="Preço"></div>
-  <button type="button" class="x" data-delacop="${i}" aria-label="Remover">×</button></div>`).join('')}</div>
-<button type="button" class="link" id="addAcop">+ Adicionar acoplável</button>`;
-};
-
-VIEWS[6]=()=>{
-  const n=S.pilares.filter(p=>p.on).length;
-  return `
-<div class="eyebrow">Etapa 6 · Pilares e ações</div>
-<h2 class="serif">O coração do programa.</h2>
-<p class="lead">Escolha de 4 a 7 pilares. Em cada um, ações que o paciente consegue cumprir. Uma por linha. Elas viram números no calendário, e o paciente anota no dia o número de cada ação que fez.</p>
-<div class="note">Na consulta de início, combine as ações com o paciente. Nada imposto. Se ele odeia bicicleta, a ação não é pedalar.</div>
-<div class="stack">${S.pilares.map((p,i)=>`
-  <div class="box ${p.on?'':'off'}">
-    <label class="boxhead"><input type="checkbox" data-k="pilares.${i}.on" data-rerender ${p.on?'checked':''}>${esc(p.nome)}</label>
-    <div class="boxbody"><textarea data-k="pilares.${i}.acoes" rows="3">${esc(p.acoes)}</textarea></div>
-  </div>`).join('')}</div>
-<div class="note ${n<4||n>7?'warn':'ok'}" style="margin-top:14px">${n} pilares ativos. ${n<4?'Ative pelo menos 4.':n>7?'Passou de 7. Simplicidade vende, corte algum.':'Dentro da faixa.'}</div>`;
-};
-
-VIEWS[7]=()=>{
-  const sug=S.modelo?MODELOS[S.modelo].metricas:[];
-  const todas=[...new Set([...sug,...S.metricas,...METRICAS_EXTRA])];
-  const nomes=S.modelo?MODELOS[S.modelo].nomes.filter(x=>x.trim().split(' ').length>1):[];
-  return `
-<div class="eyebrow">Etapa 7 · Métrica, rotina e experiência</div>
-<h2 class="serif">O paciente esquece como estava.</h2>
-<p class="lead">Escolha 1 ou 2 indicadores fáceis de mostrar em gráfico. Mede no início, no meio e no fim. Mostrar a evolução segura o paciente, faz renovar e faz indicar.</p>
-<div class="chips">${todas.map(m=>`<button type="button" class="chip ${S.metricas.includes(m)?'on':''}" data-chip="metricas" data-v="${esc(m)}">${esc(m)}</button>`).join('')}</div>
-${S.metricas.length>2?'<div class="note warn">Mais de 2 métricas vira burocracia. Fique com as que você vai de fato medir.</div>':''}
-<h3 class="sec">Rotina de acompanhamento</h3>
+${H('Etapa 5 · Preço','Quanto cobrar.','A conta começa pelo que o paciente pagaria se fizesse tudo avulso. Abaixo disso vira promoção. Por cima entra o valor do acompanhamento, que é o que ele não encontra em lugar nenhum.')}
 <div class="grid">
-  ${fSelect('diaCheck','Dia fixo da checagem do calendário',DIAS)}
-  <div class="field">Canal<div style="padding:11px 0;font-weight:400;color:var(--muted)">Grupo de WhatsApp individual: paciente, você e o parceiro</div></div>
-  ${fInput('microdesafio','Microdesafio da semana (exemplo)',{full:1,ph:'Ex.: dormir 3 noites seguidas sem acordar pelo ombro'})}
-</div>
-<div class="note">Nunca coloque vários pacientes no mesmo grupo. Ali entra intimidade e frustração. Uma comunidade com vários pacientes pode existir como bônus, para conteúdo e eventos, sem virar lugar de consulta.</div>
-${fCheck('comunidade','Incluir comunidade de pacientes como bônus')}
-<h3 class="sec">Brinde de entrada e nome</h3>
-<div class="grid">
-  ${fInput('brinde','Brinde ligado ao problema',{ph:'Ex.: kit de elásticos e hand grip'})}
-  ${fMoney('brindeCusto','Custo do brinde')}
-  ${fInput('nomePrograma','Nome do programa',{full:1,hint:'use "método" ou "programa", evite "protocolo"'})}
-</div>
-${nomes.length?`<div class="chips" style="margin-top:10px">${nomes.map(n=>`<button type="button" class="chip" data-set="nomePrograma" data-v="${esc(n)}">${esc(n)}</button>`).join('')}</div>`:''}`;
-};
-
-VIEWS[8]=()=>`
-<div class="eyebrow">Etapa 8 · Preço</div>
-<h2 class="serif">Primeiro a régua mínima. Abaixo dela é promoção.</h2>
-<p class="lead">Some o que o paciente pagaria se fizesse tudo avulso. Esse é o chão. Depois aplique um acréscimo pelo valor que o acompanhamento entrega, pela sua prova social e pela sua força comercial.</p>
-<div class="grid">
-  ${fMoney('consulta','Valor da sua consulta particular')}
-  ${fMoney('exames','Exames básicos incluídos',{hint:'se houver'})}
+  ${fMoney('consulta','Quanto custa a sua consulta particular?')}
+  ${parc.map(({p,i})=>`${fNum(`parceiros.${i}.n`,`${esc(p.nome)}: sessões`,1,40)}${fMoney(`parceiros.${i}.valor`,'Quanto você repassa por sessão')}`).join('')}
 </div>
 <div class="price" style="margin-top:22px">
   <div>
     <table class="tbl" data-live="tabela"></table>
-    ${fRange('acrescimo','Acréscimo sobre a régua',30,150,5,'pct')}
-    <div class="grid" style="margin-top:6px">${fMoney('precoManual','Ou digite o seu preço final',{full:1,hint:'deixe vazio para usar o sugerido'})}</div>
+    ${fRange('acrescimo','Quanto a mais pelo acompanhamento',30,150,5,'pct')}
+    <p style="font-size:13px;color:var(--muted);margin:0">Comece entre 30% e 50%. Com mais experiência e casos de sucesso, sobe.</p>
   </div>
   <div data-live="preco"></div>
 </div>
 <h3 class="sec">Quanto isso pode virar por mês</h3>
 ${fRange('vendasMes','Programas vendidos por mês',1,20,1,'x')}
 <div class="kpis" data-live="proj"></div>
-<div class="note">Mesmo produto, mesmo preço para todo mundo. À vista é o ideal, e o parcelamento não passa da duração do programa. Os acopláveis entram somados, caso a caso. Confira tributação e repasses com a sua contabilidade.</div>`;
+<div class="note">Mesmo preço para todos os pacientes. Procedimentos como infiltração entram à parte, somados, só quando indicados.</div>`;
+};
 
-VIEWS[9]=()=>{
+VIEWS[6]=()=>{
   const c=calc(),pa=pilaresAtivos(),tl=contatos(),b=S.beneficios.filter(x=>x.trim());
   const acop=S.acoplaveis.filter(a=>a.on&&a.nome.trim());
   const mod=S.modelo?MODELOS[S.modelo]:null;
@@ -842,57 +782,55 @@ VIEWS[9]=()=>{
   return `
 <div class="bpwrap">
 <div class="bp-hero">
-  <div class="eyebrow">Blueprint do programa</div>
+  <div class="eyebrow">Seu programa</div>
   <h2 class="serif">${esc(nomeProg())}</h2>
-  <p>${esc(S.lead.nome||'')}${S.lead.sub?' · '+esc(S.lead.sub):''}${S.lead.cidade?' · '+esc(S.lead.cidade):''}</p>
+  <p>${esc(semPonto(S.transformacao))} em ${S.semanas} semanas.</p>
 </div>
-<div class="btnrow noprint" style="margin-bottom:18px">
-  <button class="btn gold" type="button" id="pBp">Salvar blueprint em PDF</button>
+<div class="sum">
+  <div><small>Duração</small><b>${S.semanas} semanas</b><span>${S.manut?`+ manutenção de ${S.manutMeses} ${S.manutMeses==1?'mês':'meses'}`:'sem manutenção'}</span></div>
+  <div><small>Consultas</small><b>${c.consultas}</b><span>${S.presencial} presenciais e ${S.online} online</span></div>
+  <div><small>Parceiros</small><b>${c.parc.length||'Só você'}</b><span>${c.parc.length?c.parc.map(p=>`${p.nome} (${p.n})`).join(', '):'sem parceiros'}</span></div>
+  <div class="gold"><small>Preço</small><b>${brl(c.preco)}</b><span>à vista${c.meses>1?` ou ${c.meses}x de ${brl(c.parcela)}`:''}</span></div>
+</div>
+<div class="btnrow noprint" style="margin:18px 0 6px">
+  <button class="btn gold" type="button" id="pBp">Salvar em PDF</button>
   <button class="btn ghost" type="button" id="pCal">Imprimir calendário do paciente</button>
-  <button class="btn ghost" type="button" id="cpAI">Copiar para continuar com IA</button>
   <button class="btn ghost" type="button" id="dlTxt">Baixar em texto</button>
 </div>
-<div class="bp">
-  ${row(1,'Para quem é',`<p>${esc(S.publico||'A definir')}</p>`)}
-  ${row(2,'Dor e transformação',`<p><b>Dor:</b> ${esc(semPonto(S.dor))}.</p><p><b>Transformação:</b> ${esc(semPonto(S.transformacao))} em ${S.semanas} semanas.</p>${S.meta?`<p><b>Meta legal:</b> ${esc(S.meta)}</p>`:''}${b.length?`<p><b>Mantra:</b> ${b.map(esc).join(' · ')}</p>`:''}`)}
-  ${row(3,'Duração',`<p>Fase ativa de ${S.semanas} semanas${S.manut?` · Manutenção de ${S.manutMeses} ${S.manutMeses==1?'mês':'meses'}`:' · Sem manutenção'}</p>`)}
-  ${row(4,'Contatos com o médico',`<p>${S.presencial} presenciais e ${S.online} online na fase ativa${S.manut?`, ${S.manutContatos} na manutenção`:''}.</p><ul>${tl.map(t=>`<li>Semana ${t.sem} · ${t.tipo} · ${esc(t.label)}</li>`).join('')}</ul>`)}
-  ${row(5,'Parceiros',c.parc.length?`<ul>${c.parc.map(p=>`<li><b>${esc(p.nome)}</b>: ${p.n} atendimentos. ${esc(p.papel)}. Repasse de ${brl(p.valor)} por atendimento, com nota fiscal para a sua empresa.</li>`).join('')}</ul>`:'<p>Sem parceiros no início.</p>')}
-  ${row(6,'Básico e acopláveis',`<p><b>Básico:</b> ${esc(S.basico||'A definir')}</p><p><b>Acopláveis:</b> ${acop.length?acop.map(a=>esc(a.nome)+(num(a.preco)?` (${brl(a.preco)})`:'')).join(', '):'nenhum definido'}</p>`)}
-  ${row(7,'Pilares e ações',pa.map(p=>`<div class="pl"><b>Pilar ${p.letra}. ${esc(p.nome)}</b>${p.acoes.map(a=>`${a.n}) ${esc(a.a)}`).join('<br>')}</div>`).join('')||'<p>A definir</p>')}
-  ${row(8,'Métrica de evolução',`<p>${S.metricas.length?S.metricas.map(esc).join(' e '):'A definir'}. Medir na consulta de início, na metade (semana ${Math.round(S.semanas/2)}) e na reavaliação final. Mostrar ao paciente em gráfico.</p>`)}
-  ${row(9,'Rotina de acompanhamento',`<p>Checagem do calendário toda ${esc(S.diaCheck.toLowerCase())}, pelo grupo de WhatsApp individual (paciente, médico e parceiro).${S.microdesafio?` Microdesafio semanal, por exemplo: ${esc(lc(S.microdesafio))}.`:''}</p>`)}
-  ${row(10,'Diferenciais e brinde',`<p>${S.brinde?`Brinde de entrada: ${esc(S.brinde.toLowerCase())}. `:''}Grupo de WhatsApp individual. Gráfico de evolução.${S.comunidade?' Comunidade de pacientes como bônus, para conteúdo e eventos.':''}</p>`)}
-  ${row(11,'Preço',`<p>Régua mínima <b>${brl(c.regua)}</b> · Preço <b>${brl(c.preco)}</b> à vista${c.meses>1?`, ou até ${c.meses}x de ${brl(c.parcela)}`:''}.${S.manut?` Manutenção: ${brl(c.manutPreco)}.`:''} Acopláveis somados caso a caso.</p>${c.abaixo?'<p style="color:var(--bad)"><b>O preço está abaixo da régua mínima.</b></p>':''}`)}
-  ${row(12,'Fim do programa',`<p><b>Teve resultado:</b> ${S.manut?`manutenção de ${S.manutMeses} ${S.manutMeses==1?'mês':'meses'} com ${S.manutContatos} contatos e calendário quinzenal`:'alta com orientações e porta aberta para nova fase'}, com alarme de emergência: se a dor voltar acima de 4, ele avisa na hora.</p><p><b>Não atingiu a meta:</b> nova fase ativa, com estratégia ajustada.</p>`)}
-</div>
-${mod&&mod.alerta?`<div class="note warn">${esc(mod.alerta)}</div>`:''}
 
-<h3 class="sec">13. Roteiro de 5 frases para a consulta</h3>
+<h3 class="sec">O que falar na consulta</h3>
 <ol class="script">${frasesVenda().map(f=>`<li>${esc(f)}</li>`).join('')}</ol>
-<div class="note"><b>Se ele travar no preço,</b> nessa ordem: volte para a dor que ele contou, confirme que ele viu valor, ofereça o parcelamento e, só como última carta, abata a consulta do dia. Nunca ofereça desconto ou parcelamento antes de ele pedir.</div>
+<div class="note"><b>Se ele achar caro,</b> nesta ordem: lembre a dor que ele contou, confirme que ele viu valor, ofereça o parcelamento e, só no fim, desconte a consulta do dia. Não ofereça desconto nem parcelamento antes de ele pedir.</div>
 
-<h3 class="sec">A consulta de início do programa</h3>
-<div class="bp">
-  ${row('a','Conexão','<p>Perguntas abertas sobre o porquê. "Por que voltar a treinar é importante para você?"</p>')}
-  ${row('b','Mantra',`<p>Escreva no calendário dele: ${b.length?b.map(x=>'"'+esc(x)+'"').join(', '):'os 3 benefícios que ele citou'}.</p>`)}
-  ${row('c','Comprometimento','<p>De 1 a 5, quanto você está comprometido? Se for 3 ou menos, pare e realinhe. Vender para paciente em dúvida é a pior venda.</p>')}
-  ${row('d','Importância e confiança','<p>De 0 a 10. Puxe sempre para o positivo: "Por que 7 e não zero?"</p>')}
-  ${row('e','Metas',`<p>Metas pequenas por ciclo e a meta legal${S.meta?`: ${esc(lc(S.meta))}`:''}.</p>`)}
-  ${row('f','Plano de ação','<p>Combine as ações de cada pilar e marque a primeira checagem. Agende esta consulta logo depois da venda. Intervalo longo entre compra e início gera arrependimento.</p>')}
-</div>
-
-<h3 class="sec">14. Próximos 3 passos, para esta semana</h3>
+<h3 class="sec">O que fazer esta semana</h3>
 <ol>${proximosPassos().map(p=>`<li style="margin:6px 0">${esc(p)}</li>`).join('')}</ol>
 
-<h3 class="sec noprint">Para levar para o consultório</h3>
+<details class="more">
+<summary>Ver o programa completo: plano de ações, métrica, primeira consulta e fim do programa</summary>
+<div class="bp" style="margin-top:14px">
+  ${row(1,'Para quem é',`<p>${esc(S.publico||'A definir')}</p>`)}
+  ${row(2,'Dor e transformação',`<p><b>Dor:</b> ${esc(semPonto(S.dor))}.</p><p><b>Transformação:</b> ${esc(semPonto(S.transformacao))} em ${S.semanas} semanas.</p>${S.meta?`<p><b>Meta para comemorar:</b> ${esc(S.meta)}</p>`:''}${b.length?`<p><b>Benefícios que ele quer:</b> ${b.map(esc).join(' · ')}</p>`:''}`)}
+  ${row(3,'Agenda',`<ul>${tl.map(t=>`<li>Semana ${t.sem} · ${t.tipo} · ${esc(t.label)}</li>`).join('')}</ul>`)}
+  ${row(4,'Parceiros',c.parc.length?`<ul>${c.parc.map(p=>`<li><b>${esc(p.nome)}</b>: ${p.n} sessões. ${esc(p.papel)}. Repasse de ${brl(p.valor)} por sessão, com nota fiscal para a sua empresa.</li>`).join('')}</ul>`:'<p>Sem parceiros no início.</p>')}
+  ${row(5,'O que todos recebem',`<p>${esc(S.basico||'A definir')}</p><p><b>À parte, só com indicação:</b> ${acop.length?acop.map(a=>esc(a.nome)+(num(a.preco)?` (${brl(a.preco)})`:'')).join(', '):'nenhum'}</p>`)}
+  ${row(6,'Plano de ações',`<p style="color:var(--muted)">O paciente anota no calendário o número de cada ação que fez no dia.</p>`+pa.map(p=>`<div class="pl"><b>${esc(p.nome)}</b>${p.acoes.map(a=>`${a.n}) ${esc(a.a)}`).join('<br>')}</div>`).join(''))}
+  ${row(7,'Como medir a melhora',`<p>${S.metricas.length?S.metricas.map(esc).join(' e '):'A definir'}, na primeira consulta, na semana ${Math.round(S.semanas/2)} e no fim. Mostre a evolução ao paciente: ele esquece como estava.</p>`)}
+  ${row(8,'Rotina',`<p>Toda ${esc(S.diaCheck.toLowerCase())} você (ou a sua equipe) confere o calendário pelo grupo de WhatsApp só dele.${S.microdesafio?` Um desafio por semana, por exemplo: ${esc(lc(S.microdesafio))}.`:''}${S.brinde?` Na entrada, um brinde: ${esc(S.brinde.toLowerCase())}.`:''}</p>`)}
+  ${row(9,'Primeira consulta do programa',`<ul><li>Pergunte por que ${esc(lc(semPonto(S.transformacao)))||'isso'} é tão importante para ele</li><li>Escreva os benefícios que ele quer no calendário</li><li>Pergunte de 1 a 5 o quanto ele está comprometido. Se for 3 ou menos, pare e converse antes de seguir</li><li>Combine as ações com ele, nada imposto</li><li>Marque essa consulta logo depois da venda</li></ul>`)}
+  ${row(10,'Fim do programa',`<p><b>Melhorou:</b> ${S.manut?`ofereça a manutenção (${brl(c.manutPreco)}), com menos contatos`:'alta com orientações'}, e combine que se a dor voltar acima de 4 ele avisa na hora.</p><p><b>Não chegou na meta:</b> nova fase, com o plano ajustado.</p>`)}
+</div>
+${mod&&mod.alerta?`<div class="note warn">${esc(mod.alerta)}</div>`:''}
+</details>
+
+<h3 class="sec noprint">Mais materiais</h3>
 <div class="extra noprint">
-  <div class="box"><h4>Roteiro da secretária</h4><p>O que ela fala quando o paciente liga depois da consulta ou pede mais informação.</p><button class="btn ghost" type="button" data-tgl="sec">Ver roteiro</button></div>
-  <div class="box"><h4>Planilha de KPIs</h4><p>Oferecidos, vendidos, conversão, renovações e indicações, mês a mês.</p><button class="btn ghost" type="button" id="dlKpi">Baixar planilha</button></div>
-  <div class="box"><h4>Continuar com IA</h4><p>Copia o método completo mais o seu blueprint. Cole no ChatGPT, Claude ou Gemini e refine uma pergunta por vez.</p><button class="btn ghost" type="button" id="cpAI2">Copiar prompt</button></div>
+  <div class="box"><h4>Roteiro da secretária</h4><p>O que ela fala quando o paciente pede mais informação sobre o programa.</p><button class="btn ghost" type="button" data-tgl="sec">Ver roteiro</button></div>
+  <div class="box"><h4>Planilha de resultados</h4><p>Quantos programas você ofereceu, vendeu e renovou, mês a mês.</p><button class="btn ghost" type="button" id="dlKpi">Baixar planilha</button></div>
+  <div class="box"><h4>Continuar com IA</h4><p>Copia o método completo e o seu programa. Cole no ChatGPT, Claude ou Gemini para refinar.</p><button class="btn ghost" type="button" id="cpAI">Copiar</button></div>
 </div>
 <div class="pre noprint" id="secBox" hidden style="margin-top:12px">${esc(roteiroSecretaria())}</div>
-<div class="note">Material educacional para estruturar o seu negócio. Indicação de procedimento, medicação e liberação esportiva são decisões suas, caso a caso. Na divulgação, siga a resolução vigente do CFM sobre publicidade médica: nada de promessa de cura ou de resultado garantido.</div>
+<div class="adjust noprint"><div><b>Quer ajustar os detalhes?</b><p>Nome, ações do plano, procedimentos à parte, métrica e brinde.</p></div><button class="btn ghost" type="button" id="toAdjust">Ajustar detalhes</button></div>
+<div class="note">Material educacional para organizar o seu consultório. Indicação de procedimento, medicação e liberação esportiva são decisões suas, caso a caso. Na divulgação, siga a resolução do CFM sobre publicidade médica: nada de promessa de cura ou de resultado garantido.</div>
 </div>
 
 <div class="calwrap" style="margin-top:28px">
@@ -904,6 +842,60 @@ ${mod&&mod.alerta?`<div class="note warn">${esc(mod.alerta)}</div>`:''}
   <div><h3 class="serif">Programa no papel é o primeiro passo.</h3><p>Na Mentoria OrtoGuide a gente monta com você a venda, a equipe e a rotina para o programa rodar no consultório toda semana.</p></div>
   <a class="btn gold" href="${esc(CONFIG.ctaUrl)}" target="_blank" rel="noopener">${esc(CONFIG.ctaTexto)}</a>
 </div>`;
+};
+
+VIEWS[7]=()=>{
+  const n=S.pilares.filter(p=>p.on).length;
+  const sug=S.modelo?MODELOS[S.modelo].metricas:[];
+  const todas=[...new Set([...sug,...S.metricas,...METRICAS_EXTRA])];
+  const nomes=S.modelo?MODELOS[S.modelo].nomes.filter(x=>x.trim().split(' ').length>1):[];
+  return `
+${H('Opcional · Ajustes','Ajuste os detalhes do programa.','Tudo aqui já veio preenchido pelo modelo. Mexa só no que quiser e volte para o seu programa.')}
+<h3 class="sec">Nome e público</h3>
+<div class="grid">
+  ${fInput('nomePrograma','Nome do programa',{full:1,hint:'use "método" ou "programa", evite "protocolo"'})}
+  ${nomes.length?`<div class="chips full">${nomes.map(x=>`<button type="button" class="chip" data-set="nomePrograma" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>`:''}
+  ${fText('publico','Para quem é',{rows:2})}
+</div>
+<h3 class="sec">Os 3 benefícios que o paciente quer</h3>
+<p style="margin:-6px 0 12px;color:var(--muted);font-size:13.5px">Ficam escritos no calendário dele, para lembrar por que está fazendo tudo isso.</p>
+<div class="stack">${[0,1,2].map(i=>fInput('beneficios.'+i,`Benefício ${i+1}`,{full:1})).join('')}</div>
+
+<h3 class="sec">Plano de ações</h3>
+<p style="margin:-6px 0 12px;color:var(--muted);font-size:13.5px">Cada pilar é uma frente de cuidado. Ative de 4 a 7 e escreva uma ação por linha. Na primeira consulta você combina essas ações com o paciente.</p>
+<div class="stack">${S.pilares.map((p,i)=>`
+  <div class="box ${p.on?'':'off'}">
+    <label class="boxhead"><input type="checkbox" data-k="pilares.${i}.on" data-rerender ${p.on?'checked':''}>${esc(p.nome)}</label>
+    <div class="boxbody"><textarea data-k="pilares.${i}.acoes" rows="3">${esc(p.acoes)}</textarea></div>
+  </div>`).join('')}</div>
+<div class="note ${n<4||n>7?'warn':'ok'}" style="margin-top:14px">${n} pilares ativos. ${n<4?'Ative pelo menos 4.':n>7?'Passou de 7. Simples vende mais, corte algum.':'Está bom.'}</div>
+
+<h3 class="sec">O que todo paciente recebe</h3>
+<div class="grid">${fText('basico','Incluído para todos',{rows:3})}</div>
+<h3 class="sec">À parte, só quando indicado</h3>
+<p style="margin:-6px 0 6px;color:var(--muted);font-size:13.5px">Procedimentos e exames que somam ao preço quando entram.</p>
+<div>${S.acoplaveis.map((a,i)=>`<div class="acop">
+  <input type="checkbox" data-k="acoplaveis.${i}.on" ${a.on?'checked':''} title="Mostrar no programa">
+  <input type="text" data-k="acoplaveis.${i}.nome" value="${esc(a.nome)}" aria-label="Nome">
+  <div class="money"><span>R$</span><input type="number" min="0" step="50" data-k="acoplaveis.${i}.preco" data-num value="${esc(a.preco)}" aria-label="Preço"></div>
+  <button type="button" class="x" data-delacop="${i}" aria-label="Remover">×</button></div>`).join('')}</div>
+<button type="button" class="link" id="addAcop">+ Adicionar</button>
+
+<h3 class="sec">Papel de cada parceiro</h3>
+<div class="grid">${S.parceiros.map((p,i)=>p.on?fInput(`parceiros.${i}.papel`,esc(p.nome),{full:1}):'').join('')||'<p style="color:var(--muted)">Nenhum parceiro escolhido.</p>'}</div>
+
+<h3 class="sec">Como medir a melhora</h3>
+<p style="margin:-6px 0 12px;color:var(--muted);font-size:13.5px">Escolha 1 ou 2.</p>
+<div class="chips">${todas.map(m=>`<button type="button" class="chip ${S.metricas.includes(m)?'on':''}" data-chip="metricas" data-v="${esc(m)}">${esc(m)}</button>`).join('')}</div>
+
+<h3 class="sec">Rotina e brinde</h3>
+<div class="grid">
+  ${fSelect('diaCheck','Dia da checagem semanal',DIAS)}
+  ${fInput('microdesafio','Desafio da semana (exemplo)',{})}
+  ${fInput('brinde','Brinde de entrada',{ph:'Ex.: kit de elásticos'})}
+  ${fMoney('brindeCusto','Custo do brinde')}
+</div>
+${S.manut?`<h3 class="sec">Manutenção</h3><div class="grid">${fNum('manutMeses','Duração (meses)',1,12)}${fNum('manutContatos','Contatos com você',1,12)}</div>`:''}`;
 };
 
 function calendarioHTML(){
@@ -985,7 +977,7 @@ function promptIA(){
 CONTEXTO DESTA CONVERSA
 Já montei um primeiro rascunho do meu programa na ferramenta da Masterclass OrtoGuide. Não recomece do zero. Leia o blueprint abaixo, diga em 3 linhas o que está forte e o que está fraco, e depois revise comigo etapa por etapa, uma pergunta por vez, começando pelo ponto mais fraco. No fim, gere o blueprint final e ofereça o calendário de ação, o roteiro da secretária e a planilha de KPIs.
 
-Sobre mim: ${S.lead.sub||''}${S.lead.cidade?', '+S.lead.cidade:''}. Momento: ${S.lead.momento||'não informado'}. Já vendo programa: ${S.lead.vende||'não informado'}. Consulta particular: ${brl(S.consulta)}.
+Sobre mim: ${S.lead.sub||''}${S.lead.cidade?', '+S.lead.cidade:''}. Momento: ${S.lead.momento||'não informado'}. Consulta particular: ${brl(S.consulta)}.
 
 ${blueprintTexto()}`;
 }
@@ -1047,49 +1039,53 @@ function validar(i){
     if(L.whats.replace(/\D/g,'').length<10)return'Confira o WhatsApp com DDD.';
     if(!L.consent)return'Para continuar, marque a concordância com o uso dos dados.';
   }
-  if(i===2&&!S.modelo)return'Escolha um modelo para começar (ou "Começar do zero").';
-  if(i===3&&(!S.dor.trim()||!S.transformacao.trim()))return'Preencha a dor e a transformação. Elas viram o seu roteiro de venda.';
+  if(i===2&&!S.modelo)return'Escolha uma condição (ou "Começar do zero").';
+  if(i===3&&(!S.dor.trim()||!S.transformacao.trim()))return'Preencha as duas primeiras perguntas. Elas viram o que você fala na consulta.';
   return'';
 }
 
 /* ================== RENDER ================== */
 function render(){
-  const i=S.step;
-  $('#panel').innerHTML=VIEWS[i]()+(i<9?`<div class="nav">${i>0?'<button class="btn ghost" type="button" id="back">← Voltar</button>':'<span></span>'}<button class="btn ${i===8?'gold':''}" type="button" id="next">${i===0?'Começar →':i===8?'Gerar meu blueprint →':'Continuar →'}</button></div>`:`<div class="nav noprint"><button class="btn ghost" type="button" id="back">← Ajustar o programa</button><span></span></div>`);
-  $('#sideNav').innerHTML=STEPS.map((s,k)=>`<li><button type="button" data-go="${k}" class="${k===i?'cur':''} ${k<=S.max&&k!==i?'done':''}">${s}</button></li>`).join('');
-  $('#mbar').style.width=((i+1)/STEPS.length*100)+'%';
-  $('#mlabel').textContent=STEPS[i];$('#mcount').textContent=`${i+1} de ${STEPS.length}`;
+  const i=S.step,vis=Math.min(i,6);
+  let nav;
+  if(i<6)nav=`<div class="nav">${i>0?'<button class="btn ghost" type="button" id="back">← Voltar</button>':'<span></span>'}<button class="btn ${i===5?'gold':''}" type="button" id="next">${['Começar →','Entendi, vamos montar →','Continuar →','Continuar →','Continuar →','Ver meu programa →'][i]}</button></div>`;
+  else if(i===6)nav=`<div class="nav noprint"><button class="btn ghost" type="button" id="back">← Voltar ao preço</button><span></span></div>`;
+  else nav=`<div class="nav"><span></span><button class="btn gold" type="button" id="toResult">Ver meu programa atualizado →</button></div>`;
+  $('#panel').innerHTML=VIEWS[i]()+nav;
+  $('#sideNav').innerHTML=STEPS.map((s,k)=>`<li><button type="button" data-go="${k}" class="${k===vis?'cur':''} ${k<=S.max&&k!==vis?'done':''}">${s}</button></li>`).join('');
+  $('#mbar').style.width=((vis+1)/STEPS.length*100)+'%';
+  $('#mlabel').textContent=i===7?'Ajustes':STEPS[i];$('#mcount').textContent=`${vis+1} de ${STEPS.length}`;
   live();
 }
 function live(){
   document.querySelectorAll('[data-live^="rng:"]').forEach(o=>{const k=o.dataset.live.slice(4);o.textContent=FMT[o.dataset.fmt](getP(k))});
   document.querySelectorAll('[data-show]').forEach(el=>el.hidden=!getP(el.dataset.show));
   const fr=$('[data-live="frase"]');
-  if(fr)fr.innerHTML=S.transformacao.trim()?`<b>Na sua boca:</b> "${esc(semPonto(S.transformacao))} em ${S.semanas} semanas."`:'Ex.: "Voltar a jogar tênis sem dor em 12 semanas."';
+  if(fr)fr.innerHTML=S.transformacao.trim()?`<b>A promessa do seu programa:</b> "${esc(semPonto(S.transformacao))} em ${S.semanas} semanas."`:'Ex.: "Voltar a jogar tênis sem dor em 12 semanas."';
   const tl=$('[data-live="timeline"]');
-  if(tl)tl.innerHTML=contatos().map(t=>`<li class="${t.p?'p':'o'}"><b>Semana ${t.sem}</b><em>${t.tipo}</em>${esc(t.label)}</li>`).join('')+(S.manut?`<li class="o"><b>Depois</b><em>Manutenção</em>${S.manutContatos} contatos em ${S.manutMeses} ${S.manutMeses==1?'mês':'meses'}, calendário quinzenal</li>`:'');
+  if(tl)tl.innerHTML=contatos().map(t=>`<li class="${t.p?'p':'o'}"><b>Semana ${t.sem}</b><em>${t.tipo}</em>${esc(t.label)}</li>`).join('')+(S.manut?`<li class="o"><b>Depois</b><em>Manutenção</em>${S.manutContatos} contatos em ${S.manutMeses} ${S.manutMeses==1?'mês':'meses'}, calendário a cada 15 dias</li>`:'');
   const c=calc();
   const tb=$('[data-live="tabela"]');
-  if(tb)tb.innerHTML=`<tr><th>Régua mínima</th><th></th></tr>
+  if(tb)tb.innerHTML=`<tr><th>Se ele fizesse tudo avulso</th><th></th></tr>
     <tr><td>Consultas: ${c.consultas} × ${brl(S.consulta)}</td><td>${brl(c.cConsultas)}</td></tr>
     ${c.parc.map(p=>`<tr><td>${esc(p.nome)}: ${p.n} × ${brl(p.valor)}</td><td>${brl(num(p.n)*num(p.valor))}</td></tr>`).join('')}
     ${c.cExames?`<tr><td>Exames básicos</td><td>${brl(c.cExames)}</td></tr>`:''}
     ${c.cBrinde?`<tr><td>Brinde de entrada</td><td>${brl(c.cBrinde)}</td></tr>`:''}
-    <tr class="tot"><td>Régua mínima</td><td>${brl(c.regua)}</td></tr>`;
+    <tr class="tot"><td>Preço mínimo</td><td>${brl(c.regua)}</td></tr>`;
   const pr=$('[data-live="preco"]');
-  if(pr)pr.innerHTML=`<div class="bignum"><small>${S.precoManual!==''&&num(S.precoManual)>0?'Seu preço':'Preço sugerido'}</small><div class="v">${brl(c.preco)}</div>
+  if(pr)pr.innerHTML=`<div class="bignum"><small>Preço sugerido</small><div class="v">${brl(c.preco)}</div>
     <p>à vista${c.meses>1?` · ou até ${c.meses}x de ${brl(c.parcela)}`:''}</p><hr>
-    <p>Fica com você, depois de parceiros, exames e brinde: <b style="color:#fff">${brl(c.liquido)}</b></p>
-    <p>Isso dá ${brl(c.porConsulta)} por consulta sua no programa, contra ${brl(S.consulta)} na avulsa.</p>
+    <p>Fica com você, depois de pagar parceiros e brinde: <b style="color:#fff">${brl(c.liquido)}</b></p>
+    <p>Dá ${brl(c.porConsulta)} por consulta sua, contra ${brl(S.consulta)} na consulta avulsa.</p>
     ${S.manut?`<hr><p>Manutenção sugerida (${S.manutContatos} contatos): <b style="color:#fff">${brl(c.manutPreco)}</b></p>`:''}</div>
-    ${c.abaixo?'<div class="note bad"><b>Abaixo da régua mínima.</b> Assim vira pacote e promoção. Suba o preço.</div>':''}`;
+    ${c.abaixo?'<div class="note bad"><b>Abaixo do preço mínimo.</b> Assim vira promoção. Suba o valor.</div>':''}`;
   const pj=$('[data-live="proj"]');
   if(pj)pj.innerHTML=`<div><small>Receita do mês</small><b>${brl(c.receitaMes)}</b></div><div><small>Em 12 meses</small><b>${brl(c.receitaMes*12)}</b></div><div><small>Fica com você no mês</small><b>${brl(c.liquido*num(S.vendasMes))}</b></div>`;
 }
 function ir(k){
   if(k>S.step){for(let j=S.step;j<k;j++){const e=validar(j);if(e){S.step=j;render();$('#err')&&($('#err').textContent=e);return}}}
   if(S.step===0&&k>0&&!S.sent.lead){enviar('cadastro');S.sent.lead=true}
-  if(k===9&&!S.sent.bp){enviar('blueprint');S.sent.bp=true}
+  if(k===6&&!S.sent.bp){enviar('blueprint');S.sent.bp=true}
   S.step=k;S.max=Math.max(S.max,k);save();render();window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -1108,6 +1104,8 @@ document.addEventListener('click',e=>{
   const y=scrollY;
   if(t.id==='next')return ir(S.step+1);
   if(t.id==='back')return ir(S.step-1);
+  if(t.id==='toResult')return ir(6);
+  if(t.id==='toAdjust')return ir(7);
   if(t.dataset.go!==undefined){const k=+t.dataset.go;if(k<=S.max)ir(k);return}
   if(t.dataset.modelo){
     const k=t.dataset.modelo;
@@ -1115,16 +1113,20 @@ document.addEventListener('click',e=>{
     if(S.modelo!==k)aplicarModelo(k);save();render();scrollTo(0,y);return;
   }
   if(t.dataset.chip){const arr=S[t.dataset.chip],v=t.dataset.v,ix=arr.indexOf(v);ix>=0?arr.splice(ix,1):arr.push(v);save();render();scrollTo(0,y);return}
+  if(t.dataset.setnum){S[t.dataset.setnum]=+t.dataset.v;save();render();scrollTo(0,y);return}
+  if(t.dataset.parc!==undefined){const p=S.parceiros[+t.dataset.parc];p.on=!p.on;save();render();scrollTo(0,y);return}
   if(t.dataset.set){S[t.dataset.set]=t.dataset.v;save();render();scrollTo(0,y);return}
   if(t.dataset.delacop!==undefined){S.acoplaveis.splice(+t.dataset.delacop,1);save();render();scrollTo(0,y);return}
   if(t.id==='addAcop'){S.acoplaveis.push({nome:'',preco:0,on:true});save();render();scrollTo(0,y);return}
   if(t.dataset.tgl==='sec'){const b=$('#secBox');b.hidden=!b.hidden;t.textContent=b.hidden?'Ver roteiro':'Esconder roteiro';return}
   if(t.id==='pBp'){document.body.classList.add('print-bp');window.print();return}
   if(t.id==='pCal'){document.body.classList.add('print-cal');window.print();return}
-  if(t.id==='cpAI'||t.id==='cpAI2')return copiar(promptIA(),'Copiado. Cole no ChatGPT, Claude ou Gemini.');
+  if(t.id==='cpAI')return copiar(promptIA(),'Copiado. Cole no ChatGPT, Claude ou Gemini.');
   if(t.id==='dlTxt')return baixar('blueprint-'+slug(nomeProg())+'.txt',blueprintTexto(),'text/plain;charset=utf-8');
   if(t.id==='dlKpi')return baixar('kpis-'+slug(nomeProg())+'.csv',kpiCSV(),'text/csv;charset=utf-8');
 });
+window.addEventListener('beforeprint',()=>document.querySelectorAll('details').forEach(d=>{d.dataset.was=d.open?'1':'';d.open=true}));
+window.addEventListener('afterprint',()=>document.querySelectorAll('details').forEach(d=>d.open=!!d.dataset.was));
 window.addEventListener('afterprint',()=>document.body.classList.remove('print-bp','print-cal'));
 $('#resetAll').onclick=()=>{if(confirm('Apagar tudo e começar do zero?')){const lead=S.lead,sent=S.sent;S=novoEstado();S.lead=lead;S.sent={lead:sent.lead,bp:false};S.step=lead.consent?1:0;S.max=S.step;save();render()}};
 const slug=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
