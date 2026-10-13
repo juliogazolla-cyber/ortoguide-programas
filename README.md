@@ -2,9 +2,23 @@
 
 Arquivo único: `index.html`. Não precisa de servidor nem de instalação.
 
-## Antes da masterclass (17/10)
+## No ar
 
-### 1. Ligar a captura de leads (Google Sheets, 5 minutos)
+Link público: https://juliogazolla-cyber.github.io/ortoguide-programas/
+
+Para atualizar, edite o `index.html` e envie de novo para o repositório `juliogazolla-cyber/ortoguide-programas` (o Claude Code faz isso).
+
+## Leads
+
+Cada médico gera dois e-mails em julio.gazolla@gmail.com, enviados pelo FormSubmit:
+- "Novo cadastro na Masterclass": quando ele passa da primeira tela.
+- "Lead quente": quando gera o blueprint, com modelo, valor da consulta, régua mínima e preço. É quem mais vale uma ligação.
+
+Na primeira vez, o FormSubmit manda um e-mail de ativação. Sem clicar em "Activate form", nenhum lead chega.
+
+Para trocar o e-mail, altere `emailLeads` no topo do `index.html`.
+
+### Opcional: também numa planilha do Google
 
 1. Crie uma planilha no Google Sheets.
 2. Menu **Extensões > Apps Script**, apague o que tiver e cole:
@@ -22,28 +36,13 @@ function doPost(e) {
 }
 ```
 
-3. **Implantar > Nova implantação > Tipo: App da Web**. Executar como: você. Quem pode acessar: **Qualquer pessoa**.
-4. Copie a URL que termina em `/exec` e cole no topo do `index.html`:
+3. **Implantar > Nova implantação > App da Web**. Executar como: você. Acesso: **Qualquer pessoa**.
+4. Cole a URL `/exec` em `webhookUrl`, no topo do `index.html`.
 
-```js
-const CONFIG = {
-  webhookUrl: 'https://script.google.com/macros/s/XXXX/exec',
-  ...
-```
-
-A planilha recebe duas linhas por médico:
-- `cadastro`: quando ele passa da primeira tela.
-- `blueprint`: quando gera o resultado, com modelo, valor da consulta, régua mínima e preço. É o lead mais quente.
-
-Também funciona com Make, Zapier ou RD Station: qualquer URL que aceite POST com JSON no corpo.
-
-### 2. Botão final
+## Botão final
 
 `ctaUrl` e `ctaTexto` no mesmo `CONFIG`. Hoje aponta para o Instagram da OrtoGuide. Troque pelo link do WhatsApp de vendas ou da página de aplicação da Mentoria.
 
-### 3. Publicar
-
-Qualquer hospedagem de site estático serve. O mais rápido: arrastar a pasta em https://app.netlify.com/drop e ganhar um link na hora. Também roda em Vercel, GitHub Pages ou numa subpasta do site da OrtoGuide.
 
 ## O que a ferramenta faz
 
